@@ -115,7 +115,7 @@ type Reactor struct {
 	writeCallbacks []WriteCallback
 	
 	watcherLock sync.Mutex
-	watching []Binder
+	watchers []Binder
 }
 
 // Value returns the value of r, then runs or enqueues all callbacks, as
@@ -140,7 +140,7 @@ func (r Reactor) Value() Comparable {
 // before any callbacks run.
 func (r *Reactor) SetValue(v Comparable) {
 	r.Lock.Lock()
-		prev := r.Value
+		prev := r.value
 		r.value = v
 	r.Lock.Unlock()
 	
@@ -197,9 +197,9 @@ func (r *Reactor) AddConditionalWriteCallback(c WriteCallback, f func(Comparable
 
 
 func (r *Reactor) addWatcher(b Binder) {
-	watcherLock.Lock()
+	r.watcherLock.Lock()
 	r.watchers = append(r.watchers, b)
-	watcherLock.Unlock()
+	r.watcherLock.Unlock()
 }
 
 
