@@ -71,22 +71,33 @@ type WriteReactor interface {
 type ReadWriteReactor interface {
 	ReadReactor
 	WriteReactor
+	addWatcher(binding)
 }
+
+// BindingFunc represents a function that takes a value, and returns a value 
+// based on that function
+type BindingFunc func(Comparable) Comparable
 
 // Binder is an interface that represents a value that is dependent on another 
 // value, and changes when that value changes. The value of a Binder is 
-// guaranteed to be correct when calling Value(), not matter the binding type.
+// guaranteed to be eventually correct, no matter the binding type.
 type Binder interface {
 	ReadWriteReactor
 	// Adds a binding that sets the value based on the result of the function
-	AddBinding(ReadWriteReactor, func(Comparable) Comparable)
+	AddBinding(ReadWriteReactor, BindingFunc)
 	// Adds a binding that performs basic, unconditional assignment
 	AddSimpleBinding(ReadWriteReactor)
 	// Adds a binding that only runs when the value is requested
-	AddDelayedBinding(ReadWriteReactor, func(Comparable) Comparable)
+	AddDelayedBinding(ReadWriteReactor, BindingFunc)
 	// Adds a binding that runs eventually
-	AddConcurrentBinding(ReadWriteReactor, func(Comparable) Comparable)
+	AddConcurrentBinding(ReadWriteReactor, BindingFunc)
 }
 
+type binding struct {
+	// This needs to be a pointer
+	bound ReadWriteReactor
+	bindingFunc BindingFunc
+	concurrent bool
+}
 
 
