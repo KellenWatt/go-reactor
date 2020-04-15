@@ -115,13 +115,13 @@ type Reactor struct {
 	writeCallbacks []WriteCallback
 	
 	watcherLock sync.Mutex
-	watchers []Binder
+	watchers []binding
 }
 
 // Value returns the value of r, then runs or enqueues all callbacks, as
 // appropriate. For asynchronous purposes, the value passed to all functions 
 // is the value when Value is called.
-func (r Reactor) Value() Comparable {
+func (r *Reactor) Value() Comparable {
 	r.Lock.Lock()
 		val := r.value
 	r.Lock.Unlock()
@@ -148,7 +148,10 @@ func (r *Reactor) SetValue(v Comparable) {
 		c(prev, v)
 	}
 	for _,w := range r.watchers {
-		w.SetValue(v)
+		val := w.bindingFunc(v)
+		if !w.concurrent {
+			w.bound.SetValue(val)
+		}
 	}
 }
 
@@ -164,7 +167,9 @@ func (r *Reactor) AddAsyncReadCallback(c ReadCallback) {
 
 // AddConcurrentReadCallback registers a new concurrent read callback to r.
 func (r *Reactor) AddConcurrentReadCallback(c ReadCallback) {
-	r.readCallbacks = append(r.readCallbacks, makeConcurrentRead(c))
+	r.Lock.Lock()
+		r.readCallbacks = append(r.readCallbacks, makeConcurrentRead(c))
+	r.Lock.Unlock()
 }
 
 // AddConditionalReadCallback registers a new conditional read callback to r.
@@ -185,7 +190,9 @@ func (r *Reactor) AddAsyncWriteCallback(c WriteCallback) {
 
 // AddConcurrentWriteCallback registers a new concurrent write callback to r.
 func (r *Reactor) AddConcurrentWriteCallback(c WriteCallback) {
-	r.writeCallbacks = append(r.writeCallbacks, makeConcurrentWrite(c))
+	r.Lock.Lock()
+		r.writeCallbacks = append(r.writeCallbacks, makeConcurrentWrite(c))
+	r.Lock.Unlock()
 }
 
 // AddConditionalReadCallback registers a new conditional write callback to r.
@@ -196,7 +203,7 @@ func (r *Reactor) AddConditionalWriteCallback(c WriteCallback, f func(Comparable
 } 
 
 
-func (r *Reactor) addWatcher(b Binder) {
+func (r *Reactor) addWatcher(b binding) {
 	r.watcherLock.Lock()
 	r.watchers = append(r.watchers, b)
 	r.watcherLock.Unlock()
