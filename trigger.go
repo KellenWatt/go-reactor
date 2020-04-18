@@ -126,8 +126,8 @@ func (t *Trigger) AddConcurrentReadCallback(r ReadCallback) {
 		if conRead == nil {
 			conRead = make(chan readConState, 100)
 		}
-		t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
 	t.Lock.Unlock()
+	t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
 }
 
 func (t *Trigger) AddConditionalReadCallback(r ReadCallback) {
@@ -147,8 +147,8 @@ func (t *Trigger) AddConcurrentWriteCallback(w WriteCallback) {
 		if conWrite == nil {
 			conWrite = make(chan writeConState, 100)
 		}
-		t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
 	t.Lock.Unlock()
+	t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
 }
 
 func (t *Trigger) AddConditionalWriteCallback(w WriteCallback) {
