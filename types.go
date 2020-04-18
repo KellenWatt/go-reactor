@@ -27,6 +27,9 @@
 // similar functionality, to ensure thread safety on operations that affect its 
 // internal values. Specifically, methods that are thread-safe will be noted as 
 // such. If there is no such guarantee in the documentation, do not assume it is.
+//
+// Aside from ReadWriteBinder, ReadWriteInitiator, and Initiator, all 
+// interfaces provided by this package are provided as a convenience.
 package reactor
 
 
@@ -75,7 +78,7 @@ type WriteInitiator interface {
 	AddWriteCallback(WriteCallback)
 	AddAsyncWriteCallback(WriteCallback)
 	AddConcurrentWriteCallback(WriteCallback)
-	AddConditionalWriteCallback(WriteCallback, func(interface{}) bool)
+	AddConditionalWriteCallback(WriteCallback, func(interface{}, interface{}) bool)
 }
 
 // ReadWriteInitiator is the interface that groups methods from ReadInitiator 
