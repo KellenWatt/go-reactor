@@ -122,7 +122,12 @@ func (t *Trigger) AddAxyncReadCallback(r ReadCallback) {
 }
 
 func (t *Trigger) AddConcurrentReadCallback(r ReadCallback) {
-	t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
+	t.Lock.Lock()
+		if conRead == nil {
+			conRead = make(chan readConState, 100)
+		}
+		t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
+	t.Lock.Unlock()
 }
 
 func (t *Trigger) AddConditionalReadCallback(r ReadCallback) {
@@ -138,7 +143,12 @@ func (t *Trigger) AddAxyncWriteCallback(w WriteCallback) {
 }
 
 func (t *Trigger) AddConcurrentWriteCallback(w WriteCallback) {
-	t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
+	t.Lock.Lock()
+		if conWrite == nil {
+			conWrite = make(chan writeConState, 100)
+		}
+		t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
+	t.Lock.Unlock()
 }
 
 func (t *Trigger) AddConditionalWriteCallback(w WriteCallback) {
