@@ -10,7 +10,7 @@ type readConState struct {
 }
 
 type writeConState struct {
-	value interface{}
+	prev, value interface{}
 	f WriteCallback
 }
 
@@ -49,7 +49,7 @@ func makeConcurrentRead(r ReadCallback) ReadCallback {
 
 func makeConcurrentWrite(w WriteCallback) WriteCallback {
 	return func(p, v interface{}) {
-		conWrite <- writeConState{p,v w}
+		conWrite <- writeConState{p,v,w}
 	}
 }
 
