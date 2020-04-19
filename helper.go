@@ -10,8 +10,14 @@ type writeConState struct {
     f WriteCallback
 }
 
+type bindConState struct {
+	value interface{}
+	f bindingFunc
+}
+
 type conRead chan readConState
 type conWrite chan writeConState
+type conBind chan bindConState
 
 func runConcurrentRead() {
     for _,c := range conRead {
@@ -24,6 +30,13 @@ func runConcurrentWrite() {
         c.f(c.value)
     }
 }
+
+func runConcurrentBind() {
+	for _,b := range conBind {
+		b.f(b.binder.SetValue(b.source.Value()))
+	}
+}
+
 func makeAsyncWrite(w WriteCallback) WriteCallback {
     return func(p, v interface{}) {
         go w(p,v)

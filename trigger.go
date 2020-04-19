@@ -37,13 +37,16 @@ func (t *Trigger) SetValue(v interface{}) {
 	}
 
 	for _,b := range t.bindings {
-		b.binder.SetValue(b.f(v))
+		val := b.f(v)
+		if !b.concurrent {
+			b.binder.SetValue(val)
+		}
 	}
 }
 
 
 func (t *Trigger) AddBinder(b Binder, f BindingFunc) {
-	t.bindings = append(t.bindings, binding{t, b, f})
+	t.bindings = append(t.bindings, binding{t, b, f, false})
 }
 
 

@@ -127,4 +127,5 @@ type ReadWriteBinder interface {
 type binding struct {
 	source, binder Initiator
 	f BindingFunc
+	concurrent bool
 }
