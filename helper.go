@@ -1,5 +1,9 @@
 package reactor
 
+import (
+	"sync"
+)
+
 type readConState struct {
     value interface{}
     f ReadCallback
@@ -16,8 +20,11 @@ type bindConState struct {
 }
 
 type conRead chan readConState
+var conReadLock sync.Mutex
 type conWrite chan writeConState
+var conWriteLock sync.Mutex
 type conBind chan bindConState
+var conBindLock sync.Mutex
 
 func runConcurrentRead() {
     for _,c := range conRead {

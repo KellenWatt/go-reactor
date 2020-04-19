@@ -65,11 +65,12 @@ func (n *Indicator) AddAxyncReadCallback(r ReadCallback) {
 }
 
 func (n *Indicator) AddConcurrentReadCallback(r ReadCallback) {
-    n.Lock.Lock()
+    conReadLock.Lock()
         if conRead == nil {
             conRead = make(chan readConState, 100)
+			go runConcurrentRead()
         }
-    n.Lock.Unlock()
+    conReadLock.Unlock()
     n.readCallbacks = append(n.readCallbacks, makeConcurrentRead(r))
 }
 
@@ -86,11 +87,12 @@ func (n *Indicator) AddAxyncWriteCallback(w WriteCallback) {
 }
 
 func (n *Indicator) AddConcurrentWriteCallback(w WriteCallback) {
-    n.Lock.Lock()
+    conWriteLock.Lock()
         if conWrite == nil {
             conWrite = make(chan writeConState, 100)
+			go runConcurrentWrite()
         }
-    n.Lock.Unlock()
+    conWriteLock.Unlock()
     n.writeCallbacks = append(n.writeCallbacks, makeConcurrentWrite(w))
 }
 
@@ -107,12 +109,14 @@ func (n *Indicator) AddDelayedBinding(i Initiator, f BindingFunc) {
 	n.delayedBindings = append(n.delayedBindings, binder{i, n, f, false})
 }
 
+
 func (n *Indicator) AddConcurrentBinding(i Initiator, f BindingFunc) {
-	n.Lock.Lock()
+	conBindLock.Lock()
 		if conBind == nil {
 			conBind = make(chan binding, 100)
+			go runConcurrentBind()
 		}
-	n.Lock.Unlock()
+	conBindLock.Unlock()
 
 	c := func(v interface{}) interface{} {
 		conBind <- conBindState{v, f}

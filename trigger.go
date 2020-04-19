@@ -45,8 +45,8 @@ func (t *Trigger) SetValue(v interface{}) {
 }
 
 
-func (t *Trigger) AddBinder(b Binder, f BindingFunc) {
-	t.bindings = append(t.bindings, binding{t, b, f, false})
+func (t *Trigger) AddBinder(b Binder, f BindingFunc, concurrent bool) {
+	t.bindings = append(t.bindings, binding{t, b, f, concurrent})
 }
 
 
@@ -59,11 +59,12 @@ func (t *Trigger) AddAxyncReadCallback(r ReadCallback) {
 }
 
 func (t *Trigger) AddConcurrentReadCallback(r ReadCallback) {
-	t.Lock.Lock()
+	conReadLock.Lock()
 		if conRead == nil {
 			conRead = make(chan readConState, 100)
+			go runConcurrentRead()
 		}
-	t.Lock.Unlock()
+	conReadLock.Unlock()
 	t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
 }
 
@@ -80,11 +81,12 @@ func (t *Trigger) AddAxyncWriteCallback(w WriteCallback) {
 }
 
 func (t *Trigger) AddConcurrentWriteCallback(w WriteCallback) {
-	t.Lock.Lock()
+	conWriteLock.Lock()
 		if conWrite == nil {
 			conWrite = make(chan writeConState, 100)
+			go runConcurrentWrite()
 		}
-	t.Lock.Unlock()
+	conWriteLock.Unlock()
 	t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
 }
 
