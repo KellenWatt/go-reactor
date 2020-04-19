@@ -16,31 +16,38 @@ type writeConState struct {
 
 type bindConState struct {
 	value interface{}
-	f bindingFunc
+	bound Binder
+	f BindingFunc
 }
 
-type conRead chan readConState
+var conRead chan readConState
 var conReadLock sync.Mutex
-type conWrite chan writeConState
+var conWrite chan writeConState
 var conWriteLock sync.Mutex
-type conBind chan bindConState
+var conBind chan bindConState
 var conBindLock sync.Mutex
 
 func runConcurrentRead() {
-    for _,c := range conRead {
+    for c := range conRead {
         c.f(c.value)
     }
 }
 
 func runConcurrentWrite() {
-    for _,c := range conWrite {
-        c.f(c.value)
+    for c := range conWrite {
+        c.f(c.prev, c.value)
     }
 }
 
 func runConcurrentBind() {
-	for _,b := range conBind {
-		b.f(b.binder.SetValue(b.source.Value()))
+	for b := range conBind {
+		b.bound.SetValue(b.f(b.value))
+	}
+}
+
+func makeAsyncRead(r ReadCallback) ReadCallback {
+	return func(v interface{}) {
+		go r(v)
 	}
 }
 
@@ -62,7 +69,7 @@ func makeConcurrentWrite(w WriteCallback) WriteCallback {
     }
 }
 
-func makeConditionalRead(r ReadCallback, f func(interface{})bool) ReadCallbcak {
+func makeConditionalRead(r ReadCallback, f func(interface{})bool) ReadCallback {
     return func(v interface{}) {
         if f(v) {
             r(v)

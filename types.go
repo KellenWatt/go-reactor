@@ -55,7 +55,7 @@ type BindingFunc func(interface{}) interface{}
 type Initiator interface {
 	Value() interface{}
 	SetValue(interface{}) 
-	AddBinder(Binder, BindingFunc)
+	AddBinder(Binder, BindingFunc, bool)
 }
 
 // ReadInitiator is the interface that defines various callback methods to 

@@ -27,14 +27,14 @@ func (n *Indicator) Value() interface{} {
 		n.SetValue(v)
 	}
 
-	for _.c := range n.readCallbacks {
+	for _,c := range n.readCallbacks {
 		c(v)
 	}
 
 	return n.value
 }
 
-func (n *Indicator) SetValue(v interfacE{}) {
+func (n *Indicator) SetValue(v interface{}) {
 	n.Lock.Lock()
 		prev := n.value
 		n.value = v
@@ -46,21 +46,21 @@ func (n *Indicator) SetValue(v interfacE{}) {
 
 	for _,b := range n.bindings {
 		val := b.f(v)
-		if !b.concourrent {
+		if !b.concurrent {
 			b.binder.SetValue(val)
 		}
 	}
 }
 
-func (n *Indicator) AddBinder(b Binder, f BindingFunc) {
-	n.bindings = append(n.bindings, binding{n, b, f, false})
+func (n *Indicator) AddBinder(b Binder, f BindingFunc, concurrent bool) {
+	n.bindings = append(n.bindings, binding{n, b, f, concurrent})
 }
 
 func (n *Indicator) AddReadCallback(r ReadCallback) {
     n.readCallbacks = append(n.readCallbacks, r)
 }
 
-func (n *Indicator) AddAxyncReadCallback(r ReadCallback) {
+func (n *Indicator) AddAsyncReadCallback(r ReadCallback) {
     n.readCallbacks = append(n.readCallbacks, makeAsyncRead(r))
 }
 
@@ -74,15 +74,15 @@ func (n *Indicator) AddConcurrentReadCallback(r ReadCallback) {
     n.readCallbacks = append(n.readCallbacks, makeConcurrentRead(r))
 }
 
-func (n *Indicator) AddConditionalReadCallback(r ReadCallback) {
-    n.readCallbacks = append(n.readCallbacks, makeConditionalRead(r))
+func (n *Indicator) AddConditionalReadCallback(r ReadCallback, f func(interface{})bool) {
+    n.readCallbacks = append(n.readCallbacks, makeConditionalRead(r, f))
 }
 
 func (n *Indicator) AddWriteCallback(w WriteCallback) {
     n.writeCallbacks = append(n.writeCallbacks, w)
 }
 
-func (n *Indicator) AddAxyncWriteCallback(w WriteCallback) {
+func (n *Indicator) AddAsyncWriteCallback(w WriteCallback) {
     n.writeCallbacks = append(n.writeCallbacks, makeAsyncWrite(w))
 }
 
@@ -96,6 +96,10 @@ func (n *Indicator) AddConcurrentWriteCallback(w WriteCallback) {
     n.writeCallbacks = append(n.writeCallbacks, makeConcurrentWrite(w))
 }
 
+func (n *Indicator) AddConditionalWriteCallback(w WriteCallback, f func(interface{}, interface{})bool) {
+	n.writeCallbacks = append(n.writeCallbacks, makeConditionalWrite(w, f))
+}
+
 
 func (n *Indicator) AddBinding(i Initiator, f BindingFunc) {
 	i.AddBinder(n, f, false)
@@ -106,20 +110,21 @@ func (n *Indicator) AddSimpleBinding(i Initiator) {
 }
 
 func (n *Indicator) AddDelayedBinding(i Initiator, f BindingFunc) {
-	n.delayedBindings = append(n.delayedBindings, binder{i, n, f, false})
+	n.delayedBindings = append(n.delayedBindings, binding{i, n, f, false})
 }
 
 
 func (n *Indicator) AddConcurrentBinding(i Initiator, f BindingFunc) {
 	conBindLock.Lock()
 		if conBind == nil {
-			conBind = make(chan binding, 100)
+			conBind = make(chan bindConState, 100)
 			go runConcurrentBind()
 		}
 	conBindLock.Unlock()
 
 	c := func(v interface{}) interface{} {
-		conBind <- conBindState{v, f}
+		conBind <- bindConState{v, n, f}
+		return nil
 	}
 	i.AddBinder(n, c, true)
 }

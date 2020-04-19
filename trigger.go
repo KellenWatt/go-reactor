@@ -54,7 +54,7 @@ func (t *Trigger) AddReadCallback(r ReadCallback) {
 	t.readCallbacks = append(t.readCallbacks, r)
 }
 
-func (t *Trigger) AddAxyncReadCallback(r ReadCallback) {
+func (t *Trigger) AddAsyncReadCallback(r ReadCallback) {
 	t.readCallbacks = append(t.readCallbacks, makeAsyncRead(r))
 }
 
@@ -68,15 +68,15 @@ func (t *Trigger) AddConcurrentReadCallback(r ReadCallback) {
 	t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
 }
 
-func (t *Trigger) AddConditionalReadCallback(r ReadCallback) {
-	t.readCallbacks = append(t.readCallbacks, makeConditionalRead(r))
+func (t *Trigger) AddConditionalReadCallback(r ReadCallback, f func(interface{})bool) {
+	t.readCallbacks = append(t.readCallbacks, makeConditionalRead(r, f))
 }
 
 func (t *Trigger) AddWriteCallback(w WriteCallback) {
 	t.writeCallbacks = append(t.writeCallbacks, w)
 }
 
-func (t *Trigger) AddAxyncWriteCallback(w WriteCallback) {
+func (t *Trigger) AddAsyncWriteCallback(w WriteCallback) {
 	t.writeCallbacks = append(t.writeCallbacks, makeAsyncWrite(w))
 }
 
@@ -90,8 +90,8 @@ func (t *Trigger) AddConcurrentWriteCallback(w WriteCallback) {
 	t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
 }
 
-func (t *Trigger) AddConditionalWriteCallback(w WriteCallback) {
-	t.writeCallbacks = append(t.writeCallbacks, makeConditionalWrite(w))
+func (t *Trigger) AddConditionalWriteCallback(w WriteCallback, f func(interface{}, interface{})bool) {
+	t.writeCallbacks = append(t.writeCallbacks, makeConditionalWrite(w, f))
 }
 
 
