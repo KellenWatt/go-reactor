@@ -45,6 +45,27 @@ func runConcurrentBind() {
 	}
 }
 
+func killRead() {
+	conReadLock.Lock()
+		close(conRead)
+		conRead = nil
+	conReadLock.Unlock()
+}
+
+func killWrite() {
+	conWriteLock.Lock()
+		close(conWrite)
+		conWrite = nil
+	conWriteLock.Unlock()
+}
+
+func killBind() {
+	conBindLock.Lock()
+		close(conBind)
+		conBind = nil
+	conBindLock.Unlock()
+}
+
 func makeAsyncRead(r ReadCallback) ReadCallback {
 	return func(v interface{}) {
 		go r(v)
