@@ -105,7 +105,7 @@ func (n *Indicator) AddBinding(i Initiator, f BindingFunc) {
 	i.AddBinder(n, f, false)
 }
 
-func (n *Indicator) AddSimpleBinding(i Initiator) {
+func (n *Indicator) AddTrivialBinding(i Initiator) {
 	i.AddBinder(n, func(v interface{})interface{}{return v}, false)
 }
 

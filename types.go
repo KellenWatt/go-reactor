@@ -95,7 +95,7 @@ type ReadWriteInitiator interface {
 type Binder interface {
 	Initiator
 	AddBinding(Initiator, BindingFunc)
-	AddSimpleBinding(Initiator)
+	AddTrivialBinding(Initiator)
 	AddDelayedBinding(Initiator, BindingFunc)
 	AddConcurrentBinding(Initiator, BindingFunc)
 }
