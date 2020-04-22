@@ -4,8 +4,6 @@ import (
 	"sync"
 )
 
-
-
 type Indicator struct {
 	Lock sync.Mutex
 	value interface{}
@@ -18,7 +16,9 @@ type Indicator struct {
 }
 
 func (n *Indicator) Value() interface{} {
-	var v interface{}
+	n.Lock.Lock()
+		v := n.value
+	n.Lock.Unlock()
 	for _,b := range n.delayedBindings {
 		v = b.f(b.source.Value())
 	}
@@ -31,7 +31,7 @@ func (n *Indicator) Value() interface{} {
 		c(v)
 	}
 
-	return n.value
+	return v
 }
 
 func (n *Indicator) SetValue(v interface{}) {
