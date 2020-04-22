@@ -23,10 +23,10 @@
 // on any of these, see the specific methods.
 //
 // Since both callbacks and bindings offer methods that are or can be executed
-// asynchronously, each Reactor and Indicator instance offer a mutex, or 
-// similar functionality, to ensure thread safety on operations that affect its 
-// internal values. Specifically, methods that are thread-safe will be noted as 
-// such. If there is no such guarantee in the documentation, do not assume it is.
+// asynchronously, each Trigger and Indicator instance offers a mutex or 
+// similar functionality to ensure thread safety on operations that affect its 
+// internal values. This is provided as a convenience. No methods of Trigger 
+// or Indicator are thread-safe and should not be treated as such.
 //
 // Aside from ReadWriteBinder, ReadWriteInitiator, and Initiator, all 
 // interfaces provided by this package are provided as a convenience.
@@ -51,7 +51,7 @@ type BindingFunc func(interface{}) interface{}
 // AddBinder registers a binding with the Initiator instance. This is 
 // largely a convenience method used by Binder to keep implementation simple, 
 // and while its use is permitted, it is heavily discouraged for the purposes 
-// of readability.
+// of readability and predicatability.
 type Initiator interface {
 	Value() interface{}
 	SetValue(interface{}) 
@@ -59,9 +59,8 @@ type Initiator interface {
 }
 
 // ReadInitiator is the interface that defines various callback methods to 
-// respond to calls to Value. Each method required registers a callback with 
-// the ReadInitiator. For more information, see documentations for 
-// implementations.
+// respond to calls to Value. Each method registers a callback with the 
+// ReadInitiator. For more information, see documentations for implementations.
 type ReadInitiator interface {
 	Initiator
 	AddReadCallback(ReadCallback)
@@ -71,8 +70,8 @@ type ReadInitiator interface {
 }
 
 // WriteInitiator is the interface the defines various callback methods to 
-// respond to calls to SetValue. Each method required registers a callback with 
-// the ReadInitiator. For more information, see documentation for implementations.
+// respond to calls to SetValue. Each method registers a callback with the 
+// WriteInitiator. For more information, see documentation for implementations.
 type WriteInitiator interface {
 	Initiator
 	AddWriteCallback(WriteCallback)
