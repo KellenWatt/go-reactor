@@ -2,6 +2,7 @@ package reactor
 
 import (
 	"testing"
+	"strconv"
 )
 
 func TestIndicatorSetValue(t *testing.T) {
@@ -443,3 +444,180 @@ func TestIndicatorCombinedCallbacks(t *testing.T) {
 	}
 }
 
+// TODO: 
+// - Test binding 2+ Indicators together, the first being boundto trigger
+
+
+func TestAddBinding(t *testing.T) {
+	var trigger Trigger
+	var ind Indicator
+	bindFunc := func(v interface{}) interface{} {
+		return v.(int) * 2
+	}
+
+	ind.AddBinding(&trigger, bindFunc)
+	if len(trigger.bindings) != 1 {
+		t.Fatal("Binding not registered")
+	}
+
+	iters := 10
+	for i:=0; i<iters; i++ {
+		trigger.SetValue(i)
+		if ind.Value() != 2 * trigger.Value().(int) {
+			t.Fatalf("Binding inconsistent. Got %v for indicator from trigger of %v; want %d", 
+					 ind.Value(), trigger.Value(), 2*i)
+		}
+	}
+}
+
+// This is done solely for an interface{} implementation, and may not be 
+// feasible in a generic one.
+func TestMultitypeBinding(t *testing.T) {
+	var trigger Trigger
+	var ind Indicator
+	bindFunc := func(v interface{}) interface{} {
+		var str []rune
+		n := v.(int)
+		for n != 0 {
+			str = append([]rune{rune((n%10)+'0')}, str...)
+			n /= 10
+		}
+		return string(str)
+	}
+
+	ind.AddBinding(&trigger, bindFunc)
+
+	for i:=1; i<=100; i++ {
+		trigger.SetValue(i)
+		if ind.Value().(string) != strconv.Itoa(i) {
+			t.Fatalf("Got %v; expected %s", ind.Value(), strconv.Itoa(i))
+		}
+	}
+
+}
+
+func TestAddTrivialBinding(t *testing.T) {
+	var trigger Trigger
+	var ind Indicator
+
+	ind.AddTrivialBinding(&trigger)
+
+	iters := 10
+	for i:=0; i<iters; i++ {
+		trigger.SetValue(i)
+		if ind.Value() != trigger.Value() {
+			t.Fatalf("Expected equality. Got %v for trigger of %v", ind.Value(), trigger.Value())
+		}
+	}
+}
+
+func TestAddDelayedBinding(t *testing.T) {
+	var trigger Trigger
+	var ind Indicator
+	var count int
+	bindFunc := func(v interface{}) interface{} {
+		count += 1
+		return v
+	}
+
+	ind.AddDelayedBinding(&trigger, bindFunc)
+
+	iters := 10
+	for i:=0; i<iters; i++ {
+		trigger.SetValue(i)
+	}
+
+	if count != 0 {
+		t.Fatal("Delayed binding executed without call to Value")
+	}
+	
+	n := ind.Value()
+	if count != 1 || n.(int) != iters-1 {
+		t.Fatalf("Expected count to be 1; got %d\nExpected Value to be %d; got %v", count, iters-1, n)
+	}
+
+	ind.Value()
+	if count != 2 || n.(int) != iters-1 {
+		t.Fatalf("Expected count to be 2; got %d\nValue inconsistent across calls to be %d; got %v", 
+		         count, iters-1, n)
+	}
+}
+
+func TestConcurrentBinding(t *testing.T) {
+	var trigger Trigger
+	var ind Indicator
+	var count int
+	bindFunc := func(v interface{}) interface{} {
+		count += 1
+		return v.(int)+1
+	}
+
+	ind.AddConcurrentBinding(&trigger, bindFunc)
+	defer killBind()
+
+	trigger.SetValue(0)
+
+	// this is bad, but I can't think of any other way to do it
+	for ind.Value() == nil || ind.Value().(int) != trigger.Value().(int) + 1 {
+		// There should be a Fatal in here, but I can't think of how to do that reliably
+		t.Log("Indicator not updated yet")
+	}
+	// Failure state should be here, but haven't figured out reliable logic for that
+}
+
+
+func TestChainBinding(t *testing.T) {
+	var trigger Trigger
+	var ind1,ind2 Indicator 
+
+	bindFunc1 := func(v interface{}) interface{} {
+		return v.(int) + 1
+	}
+	bindFunc2 := func(v interface{}) interface{} {
+		return v.(int) * 2
+	}
+
+	ind1.AddBinding(&trigger, bindFunc1)
+	ind2.AddBinding(&ind1, bindFunc2)
+
+	trigger.SetValue(1)
+
+	if ind1.Value() != 2 {
+		t.Errorf("Expected first Indicator to be %d, with trigger %v; got %v",
+	             trigger.Value().(int) + 1, trigger.Value(), ind1.Value())
+	}
+
+	if ind2.Value() != 4 {
+		t.Fatalf("Expected second Indicator to be %d, with trigger %v; got %v",
+				 (trigger.Value().(int)+1)*2, trigger.Value(), ind2.Value())
+	}
+}
+
+
+func TestMultipleBindings(t *testing.T) {
+	var trigger Trigger
+	var ind1,ind2 Indicator 
+
+	bindFunc1 := func(v interface{}) interface{} {
+		return v.(int) + 1
+	}
+	bindFunc2 := func(v interface{}) interface{} {
+		return v.(int) * 2
+	}
+	
+	ind1.AddBinding(&trigger, bindFunc1)
+	ind2.AddBinding(&trigger, bindFunc2)
+
+	
+	trigger.SetValue(2)
+
+	if ind1.Value() != 3 {
+		t.Errorf("Expected first Indicator to be %d, with trigger %v; got %v",
+	             trigger.Value().(int) + 1, trigger.Value(), ind1.Value())
+	}
+
+	if ind2.Value() != 4 {
+		t.Fatalf("Expected second Indicator to be %d, with trigger %v; got %v",
+				 trigger.Value().(int) * 2, trigger.Value(), ind2.Value())
+	}
+}
