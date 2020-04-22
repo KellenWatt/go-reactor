@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestSetValue(t *testing.T) {
+func TestTriggerSetValue(t *testing.T) {
 	var trigger Trigger
 	want := 10
 
@@ -22,7 +22,7 @@ func TestSetValue(t *testing.T) {
 	}
 }
 
-func TestAddBinder(t *testing.T) {
+func TestTriggerAddBinder(t *testing.T) {
 	var trigger Trigger
 	var ind Indicator
 
@@ -33,7 +33,7 @@ func TestAddBinder(t *testing.T) {
 	}
 }
 
-func TestReadCallback(t *testing.T) {
+func TestTriggerReadCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	callback := func(v interface{}) {
@@ -56,7 +56,7 @@ func TestReadCallback(t *testing.T) {
 	}
 }
 
-func TestNilReadCallback(t *testing.T) {
+func TestTriggerNilReadCallback(t *testing.T) {
 	var trigger Trigger
 	var got interface{}
 	callback := func(v interface{}) {
@@ -73,7 +73,7 @@ func TestNilReadCallback(t *testing.T) {
 
 // Async callbacks make no guarantee of order or execution time/priority
 // nor should they be strictly expected to do so.
-func TestAsyncReadCallback(t *testing.T) {
+func TestTriggerAsyncReadCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	wait := make(chan int)
@@ -112,7 +112,7 @@ func TestAsyncReadCallback(t *testing.T) {
 // Concurrent callbacks are guaranteed to be executed in the order received
 // in a non-parallel fashion. Parallelism added by the developer is beyond 
 // the scope of this module and is not accounted for.
-func TestConcurrentReadCallback(t *testing.T) {
+func TestTriggerConcurrentReadCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	wait := make(chan int)
@@ -151,7 +151,7 @@ func TestConcurrentReadCallback(t *testing.T) {
 
 }
 
-func TestConditionalReadCallback(t *testing.T) {
+func TestTriggerConditionalReadCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	callback := func(v interface{}) {
@@ -175,7 +175,7 @@ func TestConditionalReadCallback(t *testing.T) {
 	}
 }
 
-func TestWriteCallback(t *testing.T) {
+func TestTriggerWriteCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	var prevValue int
@@ -206,7 +206,7 @@ func TestWriteCallback(t *testing.T) {
 	}
 }
 
-func TestNilWriteCallback(t *testing.T) {
+func TestTriggerNilWriteCallback(t *testing.T) {
 	var trigger Trigger
 	var got interface{}
 	callback := func(prev, v interface{}) {
@@ -223,7 +223,7 @@ func TestNilWriteCallback(t *testing.T) {
 
 // Async callbacks make no guarantee of order or execution time/priority
 // nor should they be strictly expected to do so.
-func TestAsyncWriteCallback(t *testing.T) {
+func TestTriggerAsyncWriteCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	wait := make(chan int)
@@ -263,7 +263,7 @@ func TestAsyncWriteCallback(t *testing.T) {
 // Concurrent callbacks are guaranteed to be executed in the order received
 // in a non-parallel fashion. Parallelism added by the developer is beyond 
 // the scope of this module and is not accounted for.
-func TestConcurrentWriteCallback(t *testing.T) {
+func TestTriggerConcurrentWriteCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	wait := make(chan int)
@@ -297,7 +297,7 @@ func TestConcurrentWriteCallback(t *testing.T) {
 	}
 }
 
-func TestConditionalWriteCallback(t *testing.T) {
+func TestTriggerConditionalWriteCallback(t *testing.T) {
 	var trigger Trigger
 	var count int
 	callback := func(prev,v interface{}) {
@@ -330,7 +330,7 @@ func TestConditionalWriteCallback(t *testing.T) {
 }
 
 // check if two triggers can share the concurrency queue peacefully
-func TestMultipleConcurrentRead(t *testing.T) {
+func TestTriggerMultipleConcurrentRead(t *testing.T) {
 	var t1,t2 Trigger
 	var out1,out2 int
 	wait1,wait2 := make(chan bool), make(chan bool)
@@ -372,7 +372,7 @@ func TestMultipleConcurrentRead(t *testing.T) {
 }
 
 // check if two triggers can share the concurrency queue peacefully
-func TestMultipleConcurrentWrite(t *testing.T) {
+func TestTriggerMultipleConcurrentWrite(t *testing.T) {
 	var t1,t2 Trigger
 	wait1,wait2 := make(chan bool), make(chan bool)
 	c1 := func(prev, v interface{}) {
@@ -410,7 +410,7 @@ func TestMultipleConcurrentWrite(t *testing.T) {
 	}
 }
 
-func TestCombinedCallbacks(t *testing.T) {
+func TestTriggerCombinedCallbacks(t *testing.T) {
 	var trigger Trigger
 
 	var nums []int
