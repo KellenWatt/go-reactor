@@ -46,10 +46,10 @@ type BindingFunc func(interface{}) interface{}
 // 
 // Value returns the value respresented by the Initiator.
 //
-// SetValue sets the value of the Initiator
+// SetValue sets the value of the Initiator.
 //
 // AddBinder registers a binding with the Initiator instance. This is 
-// largely a convenience method used by Binder to keep implementation simple, 
+// largely a convenience method used by Binders to keep interfaces fully public, 
 // and while its use is permitted, it is heavily discouraged for the purposes 
 // of readability and predicatability.
 type Initiator interface {
