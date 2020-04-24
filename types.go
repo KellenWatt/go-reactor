@@ -64,9 +64,6 @@ type Initiator interface {
 type ReadInitiator interface {
 	Initiator
 	AddReadCallback(ReadCallback)
-	AddAsyncReadCallback(ReadCallback)
-	AddConcurrentReadCallback(ReadCallback)
-	AddConditionalReadCallback(ReadCallback, func(interface{}) bool)
 }
 
 // WriteInitiator is the interface the defines various callback methods to 
@@ -75,9 +72,6 @@ type ReadInitiator interface {
 type WriteInitiator interface {
 	Initiator
 	AddWriteCallback(WriteCallback)
-	AddAsyncWriteCallback(WriteCallback)
-	AddConcurrentWriteCallback(WriteCallback)
-	AddConditionalWriteCallback(WriteCallback, func(interface{}, interface{}) bool)
 }
 
 // ReadWriteInitiator is the interface that groups methods from ReadInitiator 

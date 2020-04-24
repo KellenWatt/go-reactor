@@ -4,27 +4,27 @@ import (
 	"sync"
 )
 
-type readConState struct {
+type conReadState struct {
     value interface{}
     f ReadCallback
 }
 
-type writeConState struct {
+type conWriteState struct {
     prev, value interface{}
     f WriteCallback
 }
 
-type bindConState struct {
+type conBindState struct {
 	value interface{}
 	bound Binder
 	f BindingFunc
 }
 
-var conRead chan readConState
+var conRead chan conReadState
 var conReadLock sync.Mutex
-var conWrite chan writeConState
+var conWrite chan conWriteState
 var conWriteLock sync.Mutex
-var conBind chan bindConState
+var conBind chan conBindState
 var conBindLock sync.Mutex
 
 func runConcurrentRead() {
@@ -80,13 +80,13 @@ func makeAsyncWrite(w WriteCallback) WriteCallback {
 
 func makeConcurrentRead(r ReadCallback) ReadCallback {
     return func(v interface{}) {
-        conRead <- readConState{v, r}
+        conRead <- conReadState{v, r}
     }
 }
 
 func makeConcurrentWrite(w WriteCallback) WriteCallback {
     return func(p, v interface{}) {
-        conWrite <- writeConState{p,v,w}
+        conWrite <- conWriteState{p,v,w}
     }
 }
 
