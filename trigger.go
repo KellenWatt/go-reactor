@@ -72,59 +72,10 @@ func (t *Trigger) AddReadCallback(r ReadCallback) {
 	t.readCallbacks = append(t.readCallbacks, r)
 }
 
-// AddAsyncReadCallback adds a callback that will be run in a goroutine when t 
-// is read using Value.
-func (t *Trigger) AddAsyncReadCallback(r ReadCallback) {
-	t.readCallbacks = append(t.readCallbacks, makeAsyncRead(r))
-}
-
-// AddConcurrentReadCallback adds a callback that will be run concurrently
-// when t is read using Value.
-func (t *Trigger) AddConcurrentReadCallback(r ReadCallback) {
-	conReadLock.Lock()
-		if conRead == nil {
-			conRead = make(chan readConState, 100)
-			go runConcurrentRead()
-		}
-	conReadLock.Unlock()
-	t.readCallbacks = append(t.readCallbacks, makeConcurrentRead(r))
-}
-
-// AddConditionalReadCallback adds a callback that will be run when t is read 
-// using Value only if f evaluates to true when passed the value of t.
-func (t *Trigger) AddConditionalReadCallback(r ReadCallback, f func(interface{})bool) {
-	t.readCallbacks = append(t.readCallbacks, makeConditionalRead(r, f))
-}
-
 // AddWriteCallback adds a callback that will be run when t is written to 
 // using SetValue.
 func (t *Trigger) AddWriteCallback(w WriteCallback) {
 	t.writeCallbacks = append(t.writeCallbacks, w)
-}
-
-// AddAsyncWriteCallback adds a callback that will be run in a goroutine when t 
-// is written to using SetValue.
-func (t *Trigger) AddAsyncWriteCallback(w WriteCallback) {
-	t.writeCallbacks = append(t.writeCallbacks, makeAsyncWrite(w))
-}
-
-// AddConcurentWriteCallback adds a callback that will run concurrently when
-// t is written to using SetValue.
-func (t *Trigger) AddConcurrentWriteCallback(w WriteCallback) {
-	conWriteLock.Lock()
-		if conWrite == nil {
-			conWrite = make(chan writeConState, 100)
-			go runConcurrentWrite()
-		}
-	conWriteLock.Unlock()
-	t.writeCallbacks = append(t.writeCallbacks, makeConcurrentWrite(w))
-}
-
-// AddConditionalWriteCallback adds a callback that will be run  when t is 
-// written to using SetValue only if f evaluates to true when passed the
-// previous and new value of t.
-func (t *Trigger) AddConditionalWriteCallback(w WriteCallback, f func(interface{}, interface{})bool) {
-	t.writeCallbacks = append(t.writeCallbacks, makeConditionalWrite(w, f))
 }
 
 

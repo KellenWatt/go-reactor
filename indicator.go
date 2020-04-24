@@ -81,59 +81,10 @@ func (n *Indicator) AddReadCallback(r ReadCallback) {
     n.readCallbacks = append(n.readCallbacks, r)
 }
 
-// AddAsyncReadCallback adds a callback that will be run in a goroutine when n
-// is read using Value.
-func (n *Indicator) AddAsyncReadCallback(r ReadCallback) {
-    n.readCallbacks = append(n.readCallbacks, makeAsyncRead(r))
-}
-
-// AddConcurrentReadCallback adds a callback that will be run concurrently
-// when n is read using Value.
-func (n *Indicator) AddConcurrentReadCallback(r ReadCallback) {
-    conReadLock.Lock()
-        if conRead == nil {
-            conRead = make(chan readConState, 100)
-			go runConcurrentRead()
-        }
-    conReadLock.Unlock()
-    n.readCallbacks = append(n.readCallbacks, makeConcurrentRead(r))
-}
-
-// AddConditionalReadCallback adds a callback that will be run when n is read
-// using Value only if f evaluates to true when passed the value of n.
-func (n *Indicator) AddConditionalReadCallback(r ReadCallback, f func(interface{})bool) {
-    n.readCallbacks = append(n.readCallbacks, makeConditionalRead(r, f))
-}
-
 // AddWriteCallback adds a callback that will be run when n is written to 
 // using SetValue.
 func (n *Indicator) AddWriteCallback(w WriteCallback) {
     n.writeCallbacks = append(n.writeCallbacks, w)
-}
-
-// AddAsyncWriteCallback adds a callback that will be run in a goroutine when n
-// is written to using SetValue.
-func (n *Indicator) AddAsyncWriteCallback(w WriteCallback) {
-    n.writeCallbacks = append(n.writeCallbacks, makeAsyncWrite(w))
-}
-
-// AddConcurentWriteCallback adds a callback that will run concurrently when
-// n is written to using SetValue.
-func (n *Indicator) AddConcurrentWriteCallback(w WriteCallback) {
-    conWriteLock.Lock()
-        if conWrite == nil {
-            conWrite = make(chan writeConState, 100)
-			go runConcurrentWrite()
-        }
-    conWriteLock.Unlock()
-    n.writeCallbacks = append(n.writeCallbacks, makeConcurrentWrite(w))
-}
-
-// AddConditionalWriteCallback adds a callback that will be run when n is
-// written to using SetValue only if f evaluates to true when passed the
-// previous and new value of n.
-func (n *Indicator) AddConditionalWriteCallback(w WriteCallback, f func(interface{}, interface{})bool) {
-	n.writeCallbacks = append(n.writeCallbacks, makeConditionalWrite(w, f))
 }
 
 // AddBinding binds n to i, with the value of n being determined by calling f 
@@ -166,13 +117,13 @@ func (n *Indicator) AddDelayedBinding(i Initiator, f BindingFunc) {
 func (n *Indicator) AddConcurrentBinding(i Initiator, f BindingFunc) {
 	conBindLock.Lock()
 		if conBind == nil {
-			conBind = make(chan bindConState, 100)
+			conBind = make(chan conBindState, 100)
 			go runConcurrentBind()
 		}
 	conBindLock.Unlock()
 
 	c := func(v interface{}) interface{} {
-		conBind <- bindConState{v, n, f}
+		conBind <- conBindState{v, n, f}
 		return nil
 	}
 	i.AddBinder(n, c, true)
