@@ -93,14 +93,9 @@ func (n *Indicator) AddBinding(i Initiator, f BindingFunc) {
 	i.AddBinder(n, f, false)
 }
 
-// AddTrivialBinding binds n to i, with the value of n being equal to the value 
-// of i.
-//
-// This is equivalent to calling AddBinding with the function returning the 
-// input value.
-func (n *Indicator) AddTrivialBinding(i Initiator) {
-	i.AddBinder(n, func(v interface{})interface{}{return v}, false)
-}
+// TrivialBinding is a BindingFunc that returns the value passed to it.
+// This functions is provided as a convenience
+var TrivialBinding = BindingFunc(func(v interface{}) interface{} {return v})
 
 // AddDelayedBinding binds n to i, but the value of n is only determined when 
 // Value is called. Because of this, f is only called at the last possible 

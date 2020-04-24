@@ -497,7 +497,7 @@ func TestAddTrivialBinding(t *testing.T) {
 	var trigger Trigger
 	var ind Indicator
 
-	ind.AddTrivialBinding(&trigger)
+	ind.AddBinding(&trigger, TrivialBinding)
 
 	iters := 10
 	for i:=0; i<iters; i++ {
