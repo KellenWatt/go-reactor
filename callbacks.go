@@ -4,13 +4,14 @@ package reactor
 // WriteCallback <- func(interface{}, interface{})
 // BindingFunc <- func(interface{}) interface{}
 
-
+// Async decorates a ReadCallback as asynchronous.
 func (r ReadCallback) Async() ReadCallback {
 	return func(v interface{}) {
 		go r(v)
 	}
 }
 
+// Concurrent decorates a ReadCallback as concurrent.
 func (r ReadCallback) Concurrent() ReadCallback {
 	conReadLock.Lock()
 		if conRead == nil {
@@ -23,6 +24,8 @@ func (r ReadCallback) Concurrent() ReadCallback {
 	}
 }
 
+// Conditional decorates a ReadCallback as conditional. r will be executed 
+// only if f returns true.
 func (r ReadCallback) Conditional(f func(interface{}) bool) ReadCallback {
 	return func(v interface{}) {
 		if f(v) {
@@ -31,13 +34,14 @@ func (r ReadCallback) Conditional(f func(interface{}) bool) ReadCallback {
 	}
 }
 
-
+// Async decorates a WriteCallback as asynchronous.
 func (w WriteCallback) Async() WriteCallback {
 	return func(prev, v interface{}) {
 		go w(prev, v)
 	}
 }
 
+// Concurrent decorates a WriteCallback as concurrent.
 func (w WriteCallback) Concurrent() WriteCallback {
 	conWriteLock.Lock()
 		if conWrite == nil {
@@ -50,6 +54,8 @@ func (w WriteCallback) Concurrent() WriteCallback {
 	}
 }
 
+// Conditional decorates a WriteCallback as conditional. w will be executed
+// only if f returns true.
 func (w WriteCallback) Conditional(f func(interface{},interface{}) bool) WriteCallback {
 	return func(prev, v interface{}) {
 		if f(prev, v) {
@@ -58,21 +64,3 @@ func (w WriteCallback) Conditional(f func(interface{},interface{}) bool) WriteCa
 	}
 }
 
-
-// var AssignmentBinding = func(v interface{}) interface{} {return v}
-// 
-// func (f BindingFunc) Concurrent(b Binder) BindingFunc {
-//     conBindLock.Lock()
-//         if conBind == nil {
-//             conBind = make(chan conBindState, 100)
-//             runConcurrentBind()
-//         }
-//     conBindLock.Unlock()
-//     return func(v interface{}) interface{} {
-//         conBind <- conBindState{v, b, f}
-//     }
-// }
-// 
-// func (f BindingFunc)
-// 
-// 

@@ -33,11 +33,13 @@
 package reactor
 
 
-// ReadCallback is the function type used in all read callbacks
+// ReadCallback is the function type used in all read callbacks. Instances can 
+// be decorated to change how it behaves be default.
 type ReadCallback func(interface{})
-// WriteCallback is the function type used in all write callbacks
+// WriteCallback is the function type used in all write callbacks. Instancees
+// can be decorate to change how it behaves be default.
 type WriteCallback func(interface{}, interface{})
-// BindingFunc is the function type used in all bindings
+// BindingFunc is the function type used in all bindings.
 type BindingFunc func(interface{}) interface{}
 
 
