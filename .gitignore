@@ -17,3 +17,4 @@
 
 # Ignore dotfiles with extensions (personal trivial backup system)
 .*.* 
+todo*
