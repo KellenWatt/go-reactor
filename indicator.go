@@ -14,8 +14,8 @@ type Indicator struct {
 	readCallbacks []Callback
 	writeCallbacks []Callback
 
-	bindings []binding // dependent binders
-	delayedBindings []binding // supervisor reactors
+	bindings []Binding // dependent binders
+	delayedBindings []Binding
 }
 
 // Value returns the value underlying n and runs any callbacks associated with
@@ -31,7 +31,7 @@ func (n *Indicator) Value() interface{} {
 		v := n.value
 	n.Lock.Unlock()
 	for _,b := range n.delayedBindings {
-		v = b.f(b.source.Value())
+		v = b.F(b.Source.Value())
 	}
 
 	if len(n.delayedBindings) > 0 {
@@ -62,9 +62,9 @@ func (n *Indicator) SetValue(v interface{}) {
 	}
 
 	for _,b := range n.bindings {
-		val := b.f(v)
-		if !b.concurrent {
-			b.binder.SetValue(val)
+		val := b.F(v)
+		if !b.Concurrent {
+			b.Binder.SetValue(val)
 		}
 	}
 }
@@ -79,7 +79,7 @@ func (n *Indicator) SetValue(v interface{}) {
 // If concurrent is false, this will have exactly the same effect as 
 // Binder.AddBinding(), which is the preferred method of creating bindings.
 func (n *Indicator) AddBinder(b Binder, f BindingFunc, concurrent bool) {
-	n.bindings = append(n.bindings, binding{n, b, f, concurrent})
+	n.bindings = append(n.bindings, Binding{n, b, f, concurrent})
 }
 
 // AddReadCallback adds a callback that will be run when n is read using Value.
@@ -108,7 +108,7 @@ var TrivialBinding = BindingFunc(func(v interface{}) interface{} {return v})
 // moment. Consequently, this binding behaves differently from the others, 
 // and any side effects will be affected as such.
 func (n *Indicator) AddDelayedBinding(i Initiator, f BindingFunc) {
-	n.delayedBindings = append(n.delayedBindings, binding{i, n, f, false})
+	n.delayedBindings = append(n.delayedBindings, Binding{i, n, f, false})
 }
 
 // AddConcurrentBinding bind n to i, with the value of n being eventually 

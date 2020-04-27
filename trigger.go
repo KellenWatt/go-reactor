@@ -14,7 +14,7 @@ type Trigger struct {
 	readCallbacks []Callback
 	writeCallbacks []Callback
 
-	bindings []binding
+	bindings []Binding
 }
 
 // Value returns the value underlying t and runs any callbacks associated with 
@@ -53,9 +53,9 @@ func (t *Trigger) SetValue(v interface{}) {
 	}
 
 	for _,b := range t.bindings {
-		val := b.f(v)
-		if !b.concurrent {
-			b.binder.SetValue(val)
+		val := b.F(v)
+		if !b.Concurrent {
+			b.Binder.SetValue(val)
 		}
 	}
 }
@@ -70,7 +70,7 @@ func (t *Trigger) SetValue(v interface{}) {
 // If concurrent is false, this will have exactly the same effect as 
 // Binder.AddBinding(), which is the preferred method of creating bindings.
 func (t *Trigger) AddBinder(b Binder, f BindingFunc, concurrent bool) {
-	t.bindings = append(t.bindings, binding{t, b, f, concurrent})
+	t.bindings = append(t.bindings, Binding{t, b, f, concurrent})
 }
 
 // AddReadCallback adds a callback that will be run when t is read using Value.
