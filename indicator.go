@@ -23,6 +23,9 @@ type Indicator struct {
 // A type assertion will probably be needed to meaningfully use the returned 
 // value. If n has never been set, Value returns nil and any callbacks will be 
 // passed nil.
+//
+// The value(s) passed to the callback are as follows, in order: the current 
+// value.
 func (n *Indicator) Value() interface{} {
 	n.Lock.Lock()
 		v := n.value
@@ -45,6 +48,9 @@ func (n *Indicator) Value() interface{} {
 // SetValue sets the value underlying n and runs any callbacks associated 
 // with writing. If the current value is nil (for example, if n has not been 
 // set yet), the previous value in callbacks will be nil.
+//
+// The value(s) passed to the callback are as follows, in order: the previous 
+// value and the current value.
 func (n *Indicator) SetValue(v interface{}) {
 	n.Lock.Lock()
 		prev := n.value

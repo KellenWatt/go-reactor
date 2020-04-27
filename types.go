@@ -32,19 +32,14 @@
 // interfaces provided by this package are provided as a convenience.
 package reactor
 
-
-// ReadCallback is the function type used in all read callbacks. Instances can 
-// be decorated to change how it behaves be default.
-type ReadCallback func(interface{})
-// WriteCallback is the function type used in all write callbacks. Instancees
-// can be decorate to change how it behaves be default.
-type WriteCallback func(interface{}, interface{})
-
+// Callback is the function type used in all callbacks. Instances can be 
+// decorated to change how they behave by default. The value(s) passed to a 
+// Callback and order thereof are described in the documentation for specific 
+// functions.
 type Callback func(...interface{})
 
 // BindingFunc is the function type used in all bindings.
 type BindingFunc func(interface{}) interface{}
-
 
 
 // Initiator is the interface that defines the minimum functions required 
@@ -69,7 +64,7 @@ type Initiator interface {
 // ReadInitiator. For more information, see documentations for implementations.
 type ReadInitiator interface {
 	Initiator
-	AddReadCallback(ReadCallback)
+	AddReadCallback(Callback)
 }
 
 // WriteInitiator is the interface the defines various callback methods to 
@@ -77,7 +72,7 @@ type ReadInitiator interface {
 // WriteInitiator. For more information, see documentation for implementations.
 type WriteInitiator interface {
 	Initiator
-	AddWriteCallback(WriteCallback)
+	AddWriteCallback(Callback)
 }
 
 // ReadWriteInitiator is the interface that groups methods from ReadInitiator 
