@@ -116,9 +116,11 @@ type ReadWriteBinder interface {
 	WriteBinder
 }
 
-
-type binding struct {
-	source, binder Initiator
-	f BindingFunc
-	concurrent bool
+// Binding represents the information binding an Initiator and a Binder together.
+// Use outside of Initiator implementation is discouraged.
+type Binding struct {
+	Source Initiator
+	Binder Binder
+	F BindingFunc
+	Concurrent bool
 }
