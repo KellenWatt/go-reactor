@@ -13,12 +13,12 @@ func ExampleIndicator() {
 		return v.(int) * 2
 	})
 
-	trigger.AddReadCallback(func(v interface{}) {
-		fmt.Printf("Trigger has value: %v\n", v)
+	trigger.AddReadCallback(func(v ...interface{}) {
+		fmt.Printf("Trigger has value: %v\n", v[0])
 	})
 
-	ind.AddReadCallback(func(v interface{}) {
-		fmt.Printf("Indicator has value: %v\n", v)
+	ind.AddReadCallback(func(v ...interface{}) {
+		fmt.Printf("Indicator has value: %v\n", v[0])
 	})
 
 	trigger.Value()
@@ -61,12 +61,12 @@ func ExampleIndicator_AddDelayedBinding() {
 		return v
 	})
 
-	ind.AddWriteCallback(func(prev, v interface{}) {
-		fmt.Printf("Indicator: Previous value: %v, New value: %v\n", prev, v)
+	ind.AddWriteCallback(func(v ...interface{}) {
+		fmt.Printf("Indicator: Previous value: %v, New value: %v\n", v[0], v[1])
 	})
 
-	trigger.AddWriteCallback(func(prev, v interface{}) {
-		fmt.Printf("Trigger: Previous value: %v, New value: %v\n", prev, v)
+	trigger.AddWriteCallback(func(v ...interface{}) {
+		fmt.Printf("Trigger: Previous value: %v, New value: %v\n", v[0], v[1])
 	})
 
 	for i:=0; i<5; i++ {

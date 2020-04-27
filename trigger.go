@@ -11,8 +11,8 @@ type Trigger struct {
 	Lock sync.Mutex
 	value interface{}
 
-	readCallbacks []ReadCallback
-	writeCallbacks []WriteCallback
+	readCallbacks []Callback
+	writeCallbacks []Callback
 
 	bindings []binding
 }
@@ -68,13 +68,13 @@ func (t *Trigger) AddBinder(b Binder, f BindingFunc, concurrent bool) {
 }
 
 // AddReadCallback adds a callback that will be run when t is read using Value.
-func (t *Trigger) AddReadCallback(r ReadCallback) {
+func (t *Trigger) AddReadCallback(r Callback) {
 	t.readCallbacks = append(t.readCallbacks, r)
 }
 
 // AddWriteCallback adds a callback that will be run when t is written to 
 // using SetValue.
-func (t *Trigger) AddWriteCallback(w WriteCallback) {
+func (t *Trigger) AddWriteCallback(w Callback) {
 	t.writeCallbacks = append(t.writeCallbacks, w)
 }
 

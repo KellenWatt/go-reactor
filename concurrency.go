@@ -20,6 +20,14 @@ type conBindState struct {
 	f BindingFunc
 }
 
+type conEventState struct {
+	values []interface{}
+	f Callback
+}
+
+var conEvent chan conEventState
+var conEventLock sync.Mutex
+
 var conRead chan conReadState
 var conReadLock sync.Mutex
 var conWrite chan conWriteState
@@ -45,6 +53,12 @@ func runConcurrentBind() {
 	}
 }
 
+func runConcurrentEvent() {
+	for c := range conEvent {
+		c.f(c.values...)
+	}
+}
+
 func killRead() {
 	conReadLock.Lock()
 		close(conRead)
@@ -64,4 +78,11 @@ func killBind() {
 		close(conBind)
 		conBind = nil
 	conBindLock.Unlock()
+}
+
+func killEvent() {
+	conEventLock.Lock()
+		close(conEvent)
+		conEvent = nil
+	conEventLock.Unlock()
 }

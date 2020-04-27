@@ -64,3 +64,30 @@ func (w WriteCallback) Conditional(f func(interface{},interface{}) bool) WriteCa
 	}
 }
 
+
+func (c Callback) Async() Callback {
+	return func(v ...interface{}) {
+		go c(v...)
+	}
+}
+
+func (c Callback) Concurrent() Callback {
+	conEventLock.Lock()
+	if conEvent == nil {
+		conEvent = make(chan conEventState, 100)
+		go runConcurrentEvent()
+	}
+	conEventLock.Unlock()
+	return func(v ...interface{}) {
+		conEvent <- conEventState{v, c}
+	}
+}
+
+func (c Callback) Conditional(f func(...interface{})bool) Callback {
+	return func(v ...interface{}) {
+		if f(v...) {
+			c(v...)
+		}
+	}
+}
+

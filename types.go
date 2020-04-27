@@ -39,8 +39,12 @@ type ReadCallback func(interface{})
 // WriteCallback is the function type used in all write callbacks. Instancees
 // can be decorate to change how it behaves be default.
 type WriteCallback func(interface{}, interface{})
+
+type Callback func(...interface{})
+
 // BindingFunc is the function type used in all bindings.
 type BindingFunc func(interface{}) interface{}
+
 
 
 // Initiator is the interface that defines the minimum functions required 

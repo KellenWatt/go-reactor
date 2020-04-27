@@ -37,7 +37,7 @@ func TestIndicatorAddBinder(t *testing.T) {
 func TestIndicatorReadCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
-	callback := func(v interface{}) {
+	callback := func(v ...interface{}) {
 		count += 1
 	}
 	
@@ -60,8 +60,8 @@ func TestIndicatorReadCallback(t *testing.T) {
 func TestIndicatorNilReadCallback(t *testing.T) {
 	var trigger Indicator
 	var got interface{}
-	callback := func(v interface{}) {
-		got = v
+	callback := func(v ...interface{}) {
+		got = v[0]
 	}
 
 	trigger.AddReadCallback(callback)
@@ -78,7 +78,7 @@ func TestIndicatorAsyncReadCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	wait := make(chan int)
-	callback := ReadCallback(func(v interface{}) {
+	callback := Callback(func(v ...interface{}) {
 		trigger.Lock.Lock()
 		count += 1
 		trigger.Lock.Unlock()
@@ -117,7 +117,7 @@ func TestIndicatorConcurrentReadCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	wait := make(chan int)
-	callback := ReadCallback(func(v interface{}) {
+	callback := Callback(func(v ...interface{}) {
 		trigger.Lock.Lock()
 			count += 1
 		trigger.Lock.Unlock()
@@ -126,7 +126,7 @@ func TestIndicatorConcurrentReadCallback(t *testing.T) {
 	// stops read concurrency mechanism, to ensure test isolation
 
 	trigger.AddReadCallback(callback)
-	defer killRead()
+	defer killEvent()
 	trigger.Value()
 
 	<-wait
@@ -156,10 +156,10 @@ func TestIndicatorConditionalReadCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	maxCount := 5
-	condition := func(v interface{}) bool {
+	condition := func(v ...interface{}) bool {
 		return count < maxCount
 	}
-	callback := ReadCallback(func(v interface{}) {
+	callback := Callback(func(v ...interface{}) {
 		count += 1
 	}).Conditional(condition)
 
@@ -180,9 +180,9 @@ func TestIndicatorWriteCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	var prevValue int
-	callback := func(prev, v interface{}) {
-		if prev != nil {
-			prevValue = prev.(int)
+	callback := func(v ...interface{}) {
+		if v[0] != nil {
+			prevValue = v[0].(int)
 		}
 		count += 1
 	}
@@ -210,8 +210,8 @@ func TestIndicatorWriteCallback(t *testing.T) {
 func TestIndicatorNilWriteCallback(t *testing.T) {
 	var trigger Indicator
 	var got interface{}
-	callback := func(prev, v interface{}) {
-		got = prev
+	callback := func(v ...interface{}) {
+		got = v[0]
 	}
 
 	trigger.AddWriteCallback(callback)
@@ -228,13 +228,13 @@ func TestIndicatorAsyncWriteCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	wait := make(chan int)
-	callback := WriteCallback(func(prev, v interface{}) {
+	callback := Callback(func(v ...interface{}) {
 		trigger.Lock.Lock()
 		count += 1
 		trigger.Lock.Unlock()
 		
-		if prev != nil && prev.(int) != v.(int)-1 {
-			t.Fatalf("Previous value for %v should be %v; got %v", v, v.(int)-1, prev)
+		if v[0] != nil && v[0].(int) != v[1].(int)-1 {
+			t.Fatalf("Previous value for %v should be %v; got %v", v[0], v[0].(int)-1, v[0])
 		}
 		wait <- count
 	}).Async()
@@ -268,7 +268,7 @@ func TestIndicatorConcurrentWriteCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	wait := make(chan int)
-	callback := WriteCallback(func(prev, v interface{}) {
+	callback := Callback(func(v ...interface{}) {
 		trigger.Lock.Lock()
 			count += 1
 		trigger.Lock.Unlock()
@@ -276,7 +276,7 @@ func TestIndicatorConcurrentWriteCallback(t *testing.T) {
 	}).Concurrent()
 
 	trigger.AddWriteCallback(callback)
-	defer killWrite()
+	defer killEvent()
 	trigger.SetValue(1)
 
 	<-wait
@@ -302,17 +302,17 @@ func TestIndicatorConditionalWriteCallback(t *testing.T) {
 	var trigger Indicator
 	var count int
 	var prevVal interface{}
-	condition := func(prev,v interface{}) bool {
-		if prev == nil {
+	condition := func(v ...interface{}) bool {
+		if v[0] == nil {
 			prevVal = 0
-		} else if v.(int) - prevVal.(int) == 2 {
-			prevVal = v
+		} else if v[1].(int) - prevVal.(int) == 2 {
+			prevVal = v[1]
 			return true
 		}
 
 		return false
 	}
-	callback := WriteCallback(func(prev,v interface{}) {
+	callback := Callback(func(v ...interface{}) {
 		count += 1
 	}).Conditional(condition)
 
@@ -335,18 +335,18 @@ func TestIndicatorMultipleConcurrentRead(t *testing.T) {
 	var t1,t2 Indicator
 	var out1,out2 int
 	wait1,wait2 := make(chan bool), make(chan bool)
-	c1 := ReadCallback(func(v interface{}) {
+	c1 := Callback(func(v ...interface{}) {
 		out1 += 1
 		wait1 <- true
 	}).Concurrent()
-	c2 := ReadCallback(func(v interface{}) {
+	c2 := Callback(func(v ...interface{}) {
 		out2 += 1
 		wait2 <- true
 	}).Concurrent()
 
 	t1.AddReadCallback(c1)
 	t2.AddReadCallback(c2)
-	defer killRead()
+	defer killEvent()
 
 	maxCount := 10
 	for i:=0; i<maxCount; i++ {
@@ -376,16 +376,16 @@ func TestIndicatorMultipleConcurrentRead(t *testing.T) {
 func TestIndicatorMultipleConcurrentWrite(t *testing.T) {
 	var t1,t2 Indicator
 	wait1,wait2 := make(chan bool), make(chan bool)
-	c1 := WriteCallback(func(prev, v interface{}) {
+	c1 := Callback(func(v ...interface{}) {
 		wait1 <- true
 	}).Concurrent()
-	c2 := WriteCallback(func(prev, v interface{}) {
+	c2 := Callback(func(v ...interface{}) {
 		wait2 <- true
 	}).Concurrent()
 
 	t1.AddWriteCallback(c1)
 	t2.AddWriteCallback(c2)
-	defer killWrite()
+	defer killEvent()
 
 	maxCount := 10
 	for i:=0; i<maxCount; i++ {
@@ -416,11 +416,11 @@ func TestIndicatorCombinedCallbacks(t *testing.T) {
 
 	var nums []int
 	var nextNums []int
-	readCallback := func(v interface{}) {
-		nums = append(nums, v.(int))
+	readCallback := func(v ...interface{}) {
+		nums = append(nums, v[0].(int))
 	}
-	writeCallback := func(prev, v interface{}) {
-		nextNums = append(nextNums, v.(int))
+	writeCallback := func(v ...interface{}) {
+		nextNums = append(nextNums, v[1].(int))
 	}
 
 	trigger.SetValue(0)
