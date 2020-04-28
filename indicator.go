@@ -11,8 +11,8 @@ type Indicator struct {
 	Lock sync.Mutex
 	value interface{}
 
-	readCallbacks []Callback
-	writeCallbacks []Callback
+	readCallbacks []ReadCallback
+	writeCallbacks []WriteCallback
 
 	bindings []Binding // dependent binders
 	delayedBindings []Binding
@@ -83,13 +83,13 @@ func (n *Indicator) AddBinder(b Binder, f BindingFunc, concurrent bool) {
 }
 
 // AddReadCallback adds a callback that will be run when n is read using Value.
-func (n *Indicator) AddReadCallback(r Callback) {
+func (n *Indicator) AddReadCallback(r ReadCallback) {
     n.readCallbacks = append(n.readCallbacks, r)
 }
 
 // AddWriteCallback adds a callback that will be run when n is written to 
 // using SetValue.
-func (n *Indicator) AddWriteCallback(w Callback) {
+func (n *Indicator) AddWriteCallback(w WriteCallback) {
     n.writeCallbacks = append(n.writeCallbacks, w)
 }
 

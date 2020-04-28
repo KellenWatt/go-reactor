@@ -7,11 +7,11 @@ import (
 func ExampleTrigger() {
 	var trigger Trigger
 
-	trigger.AddReadCallback(func(v ...interface{}) {
-		fmt.Printf("Value read: %v\n", v[0])
+	trigger.AddReadCallback(func(v interface{}) {
+		fmt.Printf("Value read: %v\n", v)
 	})
-	trigger.AddWriteCallback(func(v ...interface{}) {
-		fmt.Printf("Value written: %v, Previous value: %v\n", v[1], v[0])
+	trigger.AddWriteCallback(func(prev, v interface{}) {
+		fmt.Printf("Value written: %v, Previous value: %v\n", v, prev)
 	})
 
 	trigger.Value()

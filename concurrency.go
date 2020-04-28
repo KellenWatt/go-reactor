@@ -4,9 +4,14 @@ import (
 	"sync"
 )
 
-type conEventState struct {
-	values []interface{}
-	f Callback
+type conReadState struct {
+	value interface{}
+	f ReadCallback
+}
+
+type conWriteState struct {
+	prev, value interface{}
+	f WriteCallback
 }
 
 type conBindState struct {
@@ -15,10 +20,24 @@ type conBindState struct {
 	f BindingFunc
 }
 
-var conEvent chan conEventState
-var conEventLock sync.Mutex
+var conRead chan conReadState
+var conReadLock sync.Mutex
+var conWrite chan conWriteState
+var conWriteLock sync.Mutex
 var conBind chan conBindState
 var conBindLock sync.Mutex
+
+func runConcurrentRead() {
+	for c := range conRead {
+		c.f(c.value)
+	}
+}
+
+func runConcurrentWrite() {
+	for c := range conWrite {
+		c.f(c.prev, c.value)
+	}
+}
 
 func runConcurrentBind() {
 	for b := range conBind {
@@ -26,27 +45,22 @@ func runConcurrentBind() {
 	}
 }
 
-func runConcurrentEvent() {
-	for c := range conEvent {
-		c.f(c.values...)
-	}
-}
-
 func killRead() {
-	killEvent()
+	conReadLock.Lock()
+		if conRead != nil {
+			close(conRead)
+			conRead = nil
+		}
+	conReadLock.Unlock()
 }
 
 func killWrite() {
-	killEvent()
-}
-
-func killEvent() {
-	conEventLock.Lock()
-		if conEvent != nil {
-			close(conEvent)
-			conEvent = nil
+	conWriteLock.Lock()
+		if conWrite != nil {
+			close(conWrite)
+			conWrite = nil
 		}
-	conEventLock.Unlock()
+	conWriteLock.Unlock()
 }
 
 func killBind() {
