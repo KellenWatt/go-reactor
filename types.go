@@ -38,7 +38,11 @@ package reactor
 // functions.
 type Callback func(...interface{})
 
-// BindingFunc is the function type used in all bindings.
+// ReadCallback is the function type used in all read callbacks
+type ReadCallback func(interface{})
+// WriteCallback is the function type used in all write callbacks
+type WriteCallback func(interface{}, interface{})
+// BindingFunc is the function type used in all bindings
 type BindingFunc func(interface{}) interface{}
 
 
