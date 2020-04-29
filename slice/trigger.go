@@ -16,7 +16,7 @@ type Index struct {
 
 
 
-type SliceTrigger struct {
+type Trigger struct {
 	Lock sync.Mutex
 	value []interface{}
 
@@ -29,7 +29,7 @@ type SliceTrigger struct {
 	bindings []reactor.Binding
 }
 
-func (s *SliceTrigger) Value() interface{} {
+func (s *Trigger) Value() interface{} {
 	s.Lock.Lock()
 		v := make([]interface{}, len(s.value))
 		copy(v, s.value)
@@ -42,7 +42,7 @@ func (s *SliceTrigger) Value() interface{} {
 	return v
 }
 
-func (s *SliceTrigger) SetValue(v interface{}) {
+func (s *Trigger) SetValue(v interface{}) {
 	s.Lock.Lock()
 		val := v.([]interface{})
 		prev := make([]interface{}, len(s.value))
@@ -63,22 +63,22 @@ func (s *SliceTrigger) SetValue(v interface{}) {
 	}
 }
 
-func (s *SliceTrigger) AddBinder(b reactor.Binder, f reactor.BindingFunc, concurrent bool) {
+func (s *Trigger) AddBinder(b reactor.Binder, f reactor.BindingFunc, concurrent bool) {
 	s.bindings = append(s.bindings, reactor.Binding{s, b, f, concurrent})
 }
 
 // runs from SetAt
 // funcAddIndexBinder(b reactor.Binder, f reactor.BindingFunc, concurrent bool)
 
-func (s *SliceTrigger) AddReadCallback(r reactor.ReadCallback) {
+func (s *Trigger) AddReadCallback(r reactor.ReadCallback) {
 	s.readCallbacks = append(s.readCallbacks, r)
 }
 
-func (s *SliceTrigger) AddWriteCallback(w reactor.WriteCallback) {
+func (s *Trigger) AddWriteCallback(w reactor.WriteCallback) {
 	s.writeCallbacks = append(s.writeCallbacks, w)
 }
 
-func (s *SliceTrigger) At(index int) (interface{}, error) {
+func (s *Trigger) At(index int) (interface{}, error) {
 	s.Lock.Lock()
 		valid := index >= 0 && index < len(s.value)
 		var v interface{}
@@ -97,7 +97,7 @@ func (s *SliceTrigger) At(index int) (interface{}, error) {
 	return v, nil
 }
 
-func (s *SliceTrigger) SetAt(index int, v interface{}) error {
+func (s *Trigger) SetAt(index int, v interface{}) error {
 	s.Lock.Lock()
 		valid := index >= 0 && index < len(s.value)
 		var prev interface{}
@@ -117,7 +117,7 @@ func (s *SliceTrigger) SetAt(index int, v interface{}) error {
 	return nil
 }
 
-func (s *SliceTrigger) Append(v interface{}) {
+func (s *Trigger) Append(v interface{}) {
 	s.Lock.Lock()
 		s.value = append(s.value, v)
 	s.Lock.Unlock()
@@ -127,7 +127,7 @@ func (s *SliceTrigger) Append(v interface{}) {
 	}
 }
 
-func (s *SliceTrigger) Pop() (interface{}, error) {
+func (s *Trigger) Pop() (interface{}, error) {
 	s.Lock.Lock()
 		valid := len(s.value) > 0
 		var v interface{}
@@ -148,7 +148,7 @@ func (s *SliceTrigger) Pop() (interface{}, error) {
 	return v, nil
 }
 
-func (s *SliceTrigger) Slice(from, to int) ([]interface{}, error) {
+func (s *Trigger) Slice(from, to int) ([]interface{}, error) {
 	s.Lock.Lock()
 		valid := from <= to && from >= 0 && to <= len(s.value)
 		var v []interface{}
@@ -171,15 +171,15 @@ func (s *SliceTrigger) Slice(from, to int) ([]interface{}, error) {
 
 
 // does not trigger any kind of ReadCallback
-func (s *SliceTrigger) Size() int {
+func (s *Trigger) Size() int {
 	return len(s.value)
 }
 
-func (s *SliceTrigger) AddIndexReadCallback(r reactor.ReadCallback) {
+func (s *Trigger) AddIndexReadCallback(r reactor.ReadCallback) {
 	s.indexReadCallbacks = append(s.indexReadCallbacks, r)
 }
 
-func (s *SliceTrigger) AddIndexWriteCallback(w reactor.WriteCallback) {
+func (s *Trigger) AddIndexWriteCallback(w reactor.WriteCallback) {
 	s.indexWriteCallbacks = append(s.indexWriteCallbacks, w)
 }
 

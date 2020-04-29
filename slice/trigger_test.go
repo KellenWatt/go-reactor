@@ -8,7 +8,7 @@ import (
 )
 
 func TestTriggerSetValue(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	want := []interface{}{1,2,3,4,5}
 
 	trigger.SetValue(want)
@@ -26,7 +26,7 @@ func TestTriggerSetValue(t *testing.T) {
 }
 
 func TestTriggerSetValueTypeCheck(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	
 	defer func() {
 		if recover() == nil {
@@ -38,7 +38,7 @@ func TestTriggerSetValueTypeCheck(t *testing.T) {
 }
 
 func TestTriggerSetValueSliceTypeCheck(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	
 	defer func() {
 		if recover() == nil {
@@ -50,7 +50,7 @@ func TestTriggerSetValueSliceTypeCheck(t *testing.T) {
 }
 
 func TestTriggerIndependentSetValue(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	src := []interface{}{1,2,3,4,5}
 	want := []interface{}{1,2,3,4,5}
 
@@ -64,7 +64,7 @@ func TestTriggerIndependentSetValue(t *testing.T) {
 }
 
 func TestTriggerIndependentValueResult(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	want := []interface{}{1,2,3,4,5}
 
 	trigger.SetValue(want)
@@ -80,7 +80,7 @@ func TestTriggerIndependentValueResult(t *testing.T) {
 
 
 func TestTriggerAddBinder(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	var ind reactor.Indicator
 
 	trigger.AddBinder(&ind, reactor.TrivialBinding, false)
@@ -91,7 +91,7 @@ func TestTriggerAddBinder(t *testing.T) {
 }
 
 func TestTriggerReadCallback(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	var count int
 	callback := func(v interface{}) {
 		count += 1
@@ -110,7 +110,7 @@ func TestTriggerReadCallback(t *testing.T) {
 }
 
 func TestSliceReadCallbackWrapper(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	var run bool
 	callback := SliceReadCallback(func(v []interface{}) {
 		run = true
@@ -125,7 +125,7 @@ func TestSliceReadCallbackWrapper(t *testing.T) {
 }
 
 func TestTriggerWriteCallback(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	var count int
 	callback := func(prev, v interface{}) {
 		prevVal := prev.([]interface{})
@@ -149,7 +149,7 @@ func TestTriggerWriteCallback(t *testing.T) {
 }
 
 func TestSliceWriteCallbackWrapper(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	var run bool
 	callback := SliceWriteCallback(func(prev, v []interface{}) {
 		run = true
@@ -164,7 +164,7 @@ func TestSliceWriteCallbackWrapper(t *testing.T) {
 }
 
 func TestTriggerAt(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	index := 2
 	want := arr[index]
@@ -178,7 +178,7 @@ func TestTriggerAt(t *testing.T) {
 }
 
 func TestTriggerAtFail(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 
 	trigger.SetValue(arr)
@@ -191,7 +191,7 @@ func TestTriggerAtFail(t *testing.T) {
 }
 
 func TestTriggerSetAt(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	index := 3
 	change := arr[index]
@@ -206,7 +206,7 @@ func TestTriggerSetAt(t *testing.T) {
 }
 
 func TestTriggerSetAtError(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	
 	trigger.SetValue(arr)
@@ -219,7 +219,7 @@ func TestTriggerSetAtError(t *testing.T) {
 }
 
 func TestTriggerAppend(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	add := 6
 
@@ -234,7 +234,7 @@ func TestTriggerAppend(t *testing.T) {
 }
 
 func TestTriggerPop(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	wantArr := arr[:len(arr)-1]
 	want := arr[len(arr)-1]
@@ -257,7 +257,7 @@ func TestTriggerPop(t *testing.T) {
 }
 
 func TestTriggerPopEmpty(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{}
 
 	trigger.SetValue(arr)
@@ -269,7 +269,7 @@ func TestTriggerPopEmpty(t *testing.T) {
 }
 
 func TestTriggerSlice(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	min,max := 2,4
 	want := arr[min:max]
@@ -287,7 +287,7 @@ func TestTriggerSlice(t *testing.T) {
 }
 
 func TestTriggerSliceEmpty(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	bound := 3
 
@@ -304,7 +304,7 @@ func TestTriggerSliceEmpty(t *testing.T) {
 }
 
 func TestTriggerSliceError(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 
 	trigger.SetValue(arr)
@@ -338,7 +338,7 @@ func TestTriggerSliceError(t *testing.T) {
 }
 
 func TestTriggerSize(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	want := len(arr)
 	trigger.SetValue(arr)
@@ -351,7 +351,7 @@ func TestTriggerSize(t *testing.T) {
 }
 
 func TestTriggerIndexReadCallback(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	var count int
 	callback := func(v interface{}) {
@@ -376,7 +376,7 @@ func TestTriggerIndexReadCallback(t *testing.T) {
 }
 
 func TestTriggerIndexWriteCallback(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	var count int
 	callback := func(prev, v interface{}) {
@@ -405,7 +405,7 @@ func TestTriggerIndexWriteCallback(t *testing.T) {
 }
 
 func TestSliceIndexReadCallbackWrapper(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	var count int
 	callback := IndexReadCallback(func(i int, v interface{}) {
@@ -429,7 +429,7 @@ func TestSliceIndexReadCallbackWrapper(t *testing.T) {
 }
 
 func TestSliceIndexWriteCallbackWrapper(t *testing.T) {
-	var trigger SliceTrigger
+	var trigger Trigger
 	arr := []interface{}{1,2,3,4,5}
 	var count int
 	callback := IndexWriteCallback(func(prevDex int, prev interface{}, i int, v interface{}) {
