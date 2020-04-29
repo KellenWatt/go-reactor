@@ -32,6 +32,6 @@ func IndexWriteCallback(f func(int,interface{},int,interface{})) reactor.WriteCa
         prevVal := prev.(Index)
         val := v.(Index)
 
-        f(prevVal.Key, prevVal.Value, val.Key, prevVal.Key)
+        f(prevVal.Key, prevVal.Value, val.Key, val.Value)
     }
 }
