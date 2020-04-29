@@ -78,22 +78,6 @@ func (s *SliceTrigger) AddWriteCallback(w reactor.WriteCallback) {
 	s.writeCallbacks = append(s.writeCallbacks, w)
 }
 
-func SliceReadCallback(f func([]interface{})) reactor.ReadCallback {
-	return func(v interface{}) {
-		val := v.([]interface{})
-		f(val)
-	}
-}
-
-func SliceWriteCallback(f func([]interface{}, []interface{})) reactor.WriteCallback {
-	return func(prev, v interface{}) {
-		prevVal := prev.([]interface{})
-		val := v.([]interface{})
-		f(prevVal, val)
-	}
-}
-
-
 func (s *SliceTrigger) At(index int) (interface{}, error) {
 	s.Lock.Lock()
 		valid := index >= 0 && index < len(s.value)
@@ -166,19 +150,23 @@ func (s *SliceTrigger) Pop() (interface{}, error) {
 
 func (s *SliceTrigger) Slice(from, to int) ([]interface{}, error) {
 	s.Lock.Lock()
-		valid := from <= to && from >= 0 && from < len(s.value) && to <= len(s.value)
-		v := make([]interface{}, to-from)
+		valid := from <= to && from >= 0 && to <= len(s.value)
+		var v []interface{}
 		if valid {
+			v = make([]interface{}, to-from)
 			copy(v, s.value[from:to])
 		}
+
 	s.Lock.Unlock()
 	if !valid {
 		return nil, OutOfBoundsError
 	}
 
-	for _,c := range s.ReadCallbacks {
+	for _,c := range s.readCallbacks {
 		c(v)
 	}
+
+	return v, nil
 }
 
 
@@ -195,20 +183,3 @@ func (s *SliceTrigger) AddIndexWriteCallback(w reactor.WriteCallback) {
 	s.indexWriteCallbacks = append(s.indexWriteCallbacks, w)
 }
 
-
-// Helper methods for creating index callbacks, encapsulates more complex functions
-func IndexReadCallback(f func(int,interface{})) reactor.ReadCallback {
-	return func(v interface{}) {
-		val := v.(Index)
-		f(val.Key, val.Value)
-	}
-}
-
-func IndexWriteCallback(f func(int,interface{},int,interface{})) reactor.WriteCallback {
-	return func(prev, v interface{}) {
-		prevVal := prev.(Index)
-		val := v.(Index)
-
-		f(prevVal.Key, prevVal.Value, val.Key, prevVal.Key)
-	}
-}
