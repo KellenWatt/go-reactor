@@ -135,6 +135,7 @@ func (t *Trigger) Delete(key interface{}) {
 	}
 }
 
+// Order not assured
 func (t *Trigger) Keys() []interface{} {
 	t.Lock.Lock()
 		keys := make([]interface{}, len(t.value))
@@ -147,6 +148,7 @@ func (t *Trigger) Keys() []interface{} {
 	return keys
 }
 
+// Order not assured
 func (t *Trigger) Values() []interface{} {
 	t.Lock.Lock()
 		values := make([]interface{}, len(t.value))
