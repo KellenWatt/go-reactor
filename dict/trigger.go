@@ -52,7 +52,7 @@ func (t *Trigger) SetValue(v interface{}) {
 		t.value = copyMap(m)
 	t.Lock.Unlock()
 
-	for _,c := range t.writeCallback {
+	for _,c := range t.writeCallbacks {
 		c(prev, m)
 	}
 
@@ -65,7 +65,7 @@ func (t *Trigger) SetValue(v interface{}) {
 }
 
 func (t *Trigger) AddBinder(b reactor.Binder, f reactor.BindingFunc, concurrent bool) {
-    s.bindings = append(s.bindings, reactor.Binding{s, b, f, concurrent})
+    t.bindings = append(t.bindings, reactor.Binding{t, b, f, concurrent})
 }
 
 func (t *Trigger) AddReadCallback(r reactor.ReadCallback) {
