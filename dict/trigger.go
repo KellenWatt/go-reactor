@@ -135,6 +135,30 @@ func (t *Trigger) Delete(key interface{}) {
 	}
 }
 
+func (t *Trigger) Keys() []interface{} {
+	t.Lock.Lock()
+		keys := make([]interface{}, len(t.value))
+		i := 0
+		for k,_ := range t.value {
+			keys[i] = k
+			i++
+		}
+	t.Lock.Unlock()
+	return keys
+}
+
+func (t *Trigger) Values() []interface{} {
+	t.Lock.Lock()
+		values := make([]interface{}, len(t.value))
+		i := 0
+		for _,v := range t.value {
+			values[i] = v
+			i++
+		}
+	t.Lock.Unlock()
+	return values
+}
+
 func (t *Trigger) Size() int {
 	return len(t.value)
 }
