@@ -21,7 +21,7 @@ type Pair struct {
 }
 
 type Trigger struct {
-	var Lock sync.Mutex
+	Lock sync.Mutex
 	value map[interface{}]interface{}
 
 	readCallbacks []reactor.ReadCallback
