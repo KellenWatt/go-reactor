@@ -4,7 +4,7 @@ import (
 	"github.com/KellenWatt/reactor"
 )
 
-// MapReadCallback takes a function with an map[interface{}]interface{} 
+// MapReadCallback takes a function with a map[interface{}]interface{} 
 // parameter and wraps it in a reactor.ReadCallback. This is to simplify 
 // writing read callbacks for Trigger in this package.
 func MapReadCallback(f func(map[interface{}]interface{})) reactor.ReadCallback {
@@ -25,7 +25,7 @@ func MapWriteCallback(f func(map[interface{}]interface{}, map[interface{}]interf
 	}
 }
 
-// KeyReadCallback takes a function with two interface{} paramters and wraps 
+// KeyReadCallback takes a function with two interface{} parameters and wraps 
 // it in a ReadCallback. This function decomposes a Pair struct and passes its 
 // members as arguments to f.
 func KeyReadCallback(f func(interface{}, interface{})) reactor.ReadCallback {
@@ -35,7 +35,7 @@ func KeyReadCallback(f func(interface{}, interface{})) reactor.ReadCallback {
 	}
 }
 
-// KeyWriteCallback takes a function with two sets of interface{} paramter 
+// KeyWriteCallback takes a function with two sets of interface{} parameter 
 // pairs and wraps it in a WriteCallback. This function decomposes previous 
 // and new value Pair structs and passes their members as arguments to f in 
 // a similar order to standard WriteCallbacks.

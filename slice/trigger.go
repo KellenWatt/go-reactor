@@ -16,6 +16,7 @@ type OutOfBoundsError struct {
 	text string
 }
 
+// Implementation of standard error intoerface. The error
 func (o *OutOfBoundsError) Error() string {
 	msg := fmt.Sprintf("Index %d out of bounds.", o.index)
 	if len(o.text) > 0 {
@@ -48,8 +49,8 @@ type Index struct {
 // Any slices stored in or retrieved from a Trigger will be copied values. 
 // Any modification to the source slice or result slices will have no impact 
 // on the internal value of the Trigger. If the values are pointers, the 
-// the data being pointed to can be changed without trigger events, but that 
-// is beyond the scope of this package.
+// the data being pointed to can be changed without triggering events, but 
+// handling that is beyond the scope of this package.
 type Trigger struct {
 	Lock sync.Mutex
 	value []interface{}
@@ -65,7 +66,7 @@ type Trigger struct {
 
 // Value returns a copy of the full slice underlying s.
 //
-// Value calls any Callbacks registerd with AddReadCallback, passing a copy of
+// Value calls any Callbacks registered with AddReadCallback, passing a copy of
 // the slice underlying s.
 func (s *Trigger) Value() interface{} {
 	s.Lock.Lock()
@@ -127,13 +128,13 @@ func (s *Trigger) AddBinder(b reactor.Binder, f reactor.BindingFunc, concurrent 
 // runs from SetAt. Currently unsupported 
 // funcAddIndexBinder(b reactor.Binder, f reactor.BindingFunc, concurrent bool)
 
-// AddReadCallback adds a callback that will be run when s is read using Value
+// AddReadCallback adds a callback that will be run when s is read using Value.
 func (s *Trigger) AddReadCallback(r reactor.ReadCallback) {
 	s.readCallbacks = append(s.readCallbacks, r)
 }
 
 // AddReadCallback adds a callback that will be run when s is written to using 
-// SetValue
+// SetValue.
 func (s *Trigger) AddWriteCallback(w reactor.WriteCallback) {
 	s.writeCallbacks = append(s.writeCallbacks, w)
 }
@@ -242,7 +243,7 @@ func (s *Trigger) Pop() (interface{}, error) {
 // Slice returns a slice of s with bounds of [from, to). This slice will be
 // a copy of that underlying s, and modifying it will have no impact on s. If
 // to is less than from, or from or to are outside the bounds of 
-// [0, len(s.Value())), and OutOfBoundsError will be returned. Otherwise, the 
+// [0, len(s.Value())), an OutOfBoundsError will be returned. Otherwise, the 
 // error will be nil.
 // 
 // Any callbacks registered by AddReadCallback will be called, passing a 
@@ -292,7 +293,7 @@ func (s *Trigger) AddIndexReadCallback(r reactor.ReadCallback) {
 }
 
 // AddIndexWriteCallback adds a WriteCallback that will be triggered by any 
-// index-level write events. The values passed to the callback will be twp 
+// index-level write events. The values passed to the callback will be twpo
 // Index structs containing the index and previous and new values written, 
 // respectively.
 func (s *Trigger) AddIndexWriteCallback(w reactor.WriteCallback) {
