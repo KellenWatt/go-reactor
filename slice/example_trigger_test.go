@@ -29,5 +29,5 @@ func ExampleTrigger() {
 	// Value read at index 1: 2
 	// Value written at index 1: 10, Previous value: 2
 	// Value read at index 1: 10
-	// Index out of bounds
+	// Index 5 out of bounds.
 }

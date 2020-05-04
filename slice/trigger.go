@@ -5,13 +5,32 @@ package slice
 
 import (
 	"sync"
-	"errors"
+	"fmt"
 
 	"github.com/KellenWatt/reactor"
 )
 
 // OutOfBoundsError is the error most often returned by Trigger.
-var OutOfBoundsError = errors.New("Index out of bounds")
+type OutOfBoundsError struct {
+	index int
+	text string
+}
+
+func (o *OutOfBoundsError) Error() string {
+	msg := fmt.Sprintf("Index %d out of bounds.", o.index)
+	if len(o.text) > 0 {
+		msg += " " + o.text
+	}
+	return msg
+}
+
+func NewError(index int) *OutOfBoundsError {
+	return &OutOfBoundsError{index, ""}
+}
+
+func NewTextError(index int, text string) *OutOfBoundsError {
+	return &OutOfBoundsError{index, text}
+}
 
 // Index represents a key-value pair that is passed to a callback for and event
 // on a single item.
@@ -134,7 +153,7 @@ func (s *Trigger) At(index int) (interface{}, error) {
 		}
 	s.Lock.Unlock()
 	if !valid {
-		return nil, OutOfBoundsError
+		return nil, NewError(index)
 	}
 
 	for _,c := range s.indexReadCallbacks {
@@ -161,7 +180,7 @@ func (s *Trigger) SetAt(index int, v interface{}) error {
 		}
 	s.Lock.Unlock()
 	if !valid {
-		return OutOfBoundsError
+		return NewError(index)
 	}
 
 	for _,c := range s.indexWriteCallbacks {
@@ -210,7 +229,7 @@ func (s *Trigger) Pop() (interface{}, error) {
 	s.Lock.Unlock()
 	if !valid {
 		// Probably change this to be more accurate
-		return nil, OutOfBoundsError
+		return nil, NewTextError(0, "Attempt to Pop from an empty slice.")
 	}
 
 	for _,c := range s.indexWriteCallbacks {
@@ -239,7 +258,17 @@ func (s *Trigger) Slice(from, to int) ([]interface{}, error) {
 
 	s.Lock.Unlock()
 	if !valid {
-		return nil, OutOfBoundsError
+		var bad int
+		if from < 0 || from > to {
+			bad = from
+		} else {
+			bad = to
+		}
+		var badText string
+		if from > to {
+			badText = "Starting index greater than end."
+		}
+		return nil, NewTextError(bad, badText)
 	}
 
 	for _,c := range s.readCallbacks {
